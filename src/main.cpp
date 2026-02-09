@@ -1,7 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <array>
 #include <cassert>
@@ -10,6 +12,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <string>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -24,9 +27,11 @@ static const int NUM_ROWS = (HEIGHT / CELL_SIZE);
 static const int NUM_COLS = (WIDTH / CELL_SIZE);
 static sf::Color CELL_COLOR = sf::Color::White;
 static sf::Color BACKGROUND_COLOR = sf::Color::Black;
-static const int GENERATION_DELAY_MS = 300;
+static const int GENERATION_DELAY_MS = 500;
 static int dxs[8][2] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1},
                         {0, 1},   {1, -1}, {1, 0},  {1, 1}};
+static int generation = 0;
+static const sf::Font jetbrainsMonoNerd("/usr/share/fonts/JetBrainsMonoNerd/JetBrainsMonoNerdFont-Light.ttf");
 
 #define INBOUNDS(i, j) (i >= 0 and i < NUM_ROWS and j >= 0 and j < NUM_COLS)
 
@@ -129,6 +134,13 @@ static void generate() {
     else
       board[i][j] = CellState::ALIVE;
   }
+
+	// update the "generation" label
+	generation++;
+	std::string label = "generation: " + std::to_string(generation);
+	sf::Text generationLabel(jetbrainsMonoNerd, label);
+	generationLabel.setPosition({20.0f, 20.0f});
+	window.draw(generationLabel);
 }
 
 int main() {

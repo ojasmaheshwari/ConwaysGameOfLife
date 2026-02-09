@@ -5,6 +5,7 @@
 namespace offsets {
 const int glider[5][2] = {{0, 0}, {0, 1}, {0, 2}, {1, 0}, {2, 1}};
 const int f_pentonimo[5][2] = {{0, 0}, {0, 1}, {1, -1}, {1, 0}, {2, 0}};
+const int tetris_rev_t[4][2] = {{0, 0}, {1, 0}, {1, -1}, {1, 1}};
 } // namespace offsets
 
 std::vector<std::pair<int, int>>
