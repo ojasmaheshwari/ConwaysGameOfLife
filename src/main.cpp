@@ -5,6 +5,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/VideoMode.hpp>
+#include <SFML/Window/WindowEnums.hpp>
 #include <array>
 #include <cassert>
 #include <chrono>
@@ -34,8 +35,9 @@ static int generation = 0;
 static const sf::Font jetbrainsMonoNerd("JetBrainsMonoNerdFont-Light.ttf");
 
 #define INBOUNDS(i, j) (i >= 0 and i < NUM_ROWS and j >= 0 and j < NUM_COLS)
+#define COLOR_GRAY sf::Color(179, 169, 168)
 
-static sf::RenderWindow window(sf::VideoMode({WIDTH, HEIGHT}), TITLE);
+static sf::RenderWindow window(sf::VideoMode({WIDTH, HEIGHT}), TITLE, sf::Style::Titlebar | sf::Style::Close);
 
 enum class CellState { ALIVE = 0, DEAD };
 
@@ -67,7 +69,7 @@ static void initBoard() {
                           sizeof(offsets::f_pentonimo) / sizeof(int), i, j);
 
   for (const auto &[_i, _j] : pos) {
-    if (!INBOUNDS(i, j)) {
+    if (!INBOUNDS(_i, _j)) {
       initBoard();
       break;
     }
@@ -111,6 +113,7 @@ static void drawGenerationLabel() {
 	generation++;
 	std::string label = "generation: " + std::to_string(generation);
 	sf::Text generationLabel(jetbrainsMonoNerd, label);
+	generationLabel.setCharacterSize(16);
 	generationLabel.setPosition({20.0f, 20.0f});
 	window.draw(generationLabel);
 }
@@ -142,7 +145,23 @@ static void generate() {
     else
       board[i][j] = CellState::ALIVE;
   }
+}
 
+static void drawGrids() {
+	// row lines
+	for (int i = 0; i < NUM_ROWS; i++) {
+		sf::RectangleShape rect({WIDTH, 1});
+		rect.setPosition({0, i * CELL_SIZE * 1.0f});
+		rect.setFillColor(COLOR_GRAY);
+		window.draw(rect);
+	}
+	// column lines
+	for (int i = 0; i < NUM_COLS; i++) {
+		sf::RectangleShape rect({1, HEIGHT});
+		rect.setPosition({i * CELL_SIZE * 1.0f, 0});
+		rect.setFillColor(COLOR_GRAY);
+		window.draw(rect);
+	}
 }
 
 int main() {
@@ -158,6 +177,7 @@ int main() {
     window.clear(BACKGROUND_COLOR);
 
     generate();
+		drawGrids();
 		drawGenerationLabel();
     drawBoard();
 
