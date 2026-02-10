@@ -107,6 +107,14 @@ static int getAliveNeighbours(size_t i, size_t j) {
   return ans;
 }
 
+static void drawGenerationLabel() {
+	generation++;
+	std::string label = "generation: " + std::to_string(generation);
+	sf::Text generationLabel(jetbrainsMonoNerd, label);
+	generationLabel.setPosition({20.0f, 20.0f});
+	window.draw(generationLabel);
+}
+
 // Processes 1 generation
 static void generate() {
   // decide which cells need change i.e. flipped
@@ -135,12 +143,6 @@ static void generate() {
       board[i][j] = CellState::ALIVE;
   }
 
-	// update the "generation" label
-	generation++;
-	std::string label = "generation: " + std::to_string(generation);
-	sf::Text generationLabel(jetbrainsMonoNerd, label);
-	generationLabel.setPosition({20.0f, 20.0f});
-	window.draw(generationLabel);
 }
 
 int main() {
@@ -156,8 +158,9 @@ int main() {
     window.clear(BACKGROUND_COLOR);
 
     generate();
-
+		drawGenerationLabel();
     drawBoard();
+
     window.display();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(GENERATION_DELAY_MS));
