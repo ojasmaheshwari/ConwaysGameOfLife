@@ -4,6 +4,9 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Window/WindowEnums.hpp>
 #include <array>
@@ -17,8 +20,6 @@
 #include <thread>
 #include <utility>
 #include <vector>
-
-#include "initial_configs.h"
 
 static const int WIDTH = 1200;
 static const int HEIGHT = 700;
@@ -60,31 +61,15 @@ static void initBoard() {
       board[i][j] = CellState::DEAD;
     }
   }
-
-  // Decide initial configuration
-  int i = rand() % NUM_ROWS;
-  int j = rand() % NUM_COLS;
-
-  auto pos = applyOffsets((int *)offsets::f_pentonimo,
-                          sizeof(offsets::f_pentonimo) / sizeof(int), i, j);
-
-  for (const auto &[_i, _j] : pos) {
-    if (!INBOUNDS(_i, _j)) {
-      initBoard();
-      break;
-    }
-    board[_i][_j] = CellState::ALIVE;
-  }
 }
 
 static void drawBoard() {
   for (size_t i = 0; i < NUM_ROWS; i++) {
     for (size_t j = 0; j < NUM_COLS; j++) {
-      CellState state = board[i][j];
-
+      CellState &state = board[i][j];
       if (state == CellState::ALIVE) {
         sf::RectangleShape rect({CELL_SIZE, CELL_SIZE});
-        rect.setPosition({i * CELL_SIZE * 1.0f, j * CELL_SIZE * 1.0f});
+        rect.setPosition({j * CELL_SIZE * 1.0f, i * CELL_SIZE * 1.0f});
         rect.setFillColor(CELL_COLOR);
 
         window.draw(rect);
@@ -164,25 +149,56 @@ static void drawGrids() {
 	}
 }
 
+static std::pair<int, int> getCellFromMouseClick(int x, int y) {
+	int i = x / CELL_SIZE;
+	int j = y / CELL_SIZE;
+
+	assert(INBOUNDS(j, i));
+	return {j, i};
+}
+
 int main() {
   srand(time(0));
   initBoard();
 
+	bool isStartingPositionChosen = false;
+
   while (window.isOpen()) {
     while (const std::optional event = window.pollEvent()) {
-      if (event->is<sf::Event::Closed>())
+			if (const auto *key = event->getIf<sf::Event::KeyReleased>()) {
+				if (key->scancode == sf::Keyboard::Scan::Enter) {
+					isStartingPositionChosen = true;
+				}
+			} else if (const auto *mouseClick = event->getIf<sf::Event::MouseButtonReleased>()) {
+				if (mouseClick->button == sf::Mouse::Button::Left) {
+					// get the cell coordinates from the click
+					std::pair<int, int> cellCoords = getCellFromMouseClick(mouseClick->position.x, mouseClick->position.y);
+					CellState &cell = board[cellCoords.first][cellCoords.second];
+					if (cell == CellState::ALIVE) {
+						cell = CellState::DEAD;
+					} else {
+						cell = CellState::ALIVE;
+					}
+				}
+			} else if (event->is<sf::Event::Closed>()) {
         window.close();
+			}
     }
 
     window.clear(BACKGROUND_COLOR);
 
-    generate();
 		drawGrids();
-		drawGenerationLabel();
-    drawBoard();
 
-    window.display();
+		if (!isStartingPositionChosen) {
+			drawBoard();
+			window.display();
+		} else {
+			generate();
+			drawGenerationLabel();
+			drawBoard();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(GENERATION_DELAY_MS));
+			window.display();
+			std::this_thread::sleep_for(std::chrono::milliseconds(GENERATION_DELAY_MS));
+		}
   }
 }
