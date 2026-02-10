@@ -13,3 +13,6 @@ add_executable(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} SFML::Graphics SFML::Window SFML::System)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/res/JetBrainsMonoNerdFont-Light.ttf
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

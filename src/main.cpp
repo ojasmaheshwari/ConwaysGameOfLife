@@ -31,7 +31,7 @@ static const int GENERATION_DELAY_MS = 500;
 static int dxs[8][2] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1},
                         {0, 1},   {1, -1}, {1, 0},  {1, 1}};
 static int generation = 0;
-static const sf::Font jetbrainsMonoNerd("/usr/share/fonts/JetBrainsMonoNerd/JetBrainsMonoNerdFont-Light.ttf");
+static const sf::Font jetbrainsMonoNerd("JetBrainsMonoNerdFont-Light.ttf");
 
 #define INBOUNDS(i, j) (i >= 0 and i < NUM_ROWS and j >= 0 and j < NUM_COLS)
 
